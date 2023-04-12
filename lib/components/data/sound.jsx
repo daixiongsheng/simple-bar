@@ -1,12 +1,12 @@
-import * as Uebersicht from "uebersicht";
-import * as DataWidget from "./data-widget.jsx";
-import * as DataWidgetLoader from "./data-widget-loader.jsx";
-import * as Icons from "../icons.jsx";
-import useWidgetRefresh from "../../hooks/use-widget-refresh";
-import * as Settings from "../../settings";
-import * as Utils from "../../utils";
+import * as Uebersicht from 'uebersicht';
+import * as DataWidget from './data-widget.jsx';
+import * as DataWidgetLoader from './data-widget-loader.jsx';
+import * as Icons from '../icons.jsx';
+import useWidgetRefresh from '../../hooks/use-widget-refresh';
+import * as Settings from '../../settings';
+import * as Utils from '../../utils';
 
-export { soundStyles as styles } from "../../styles/components/data/sound";
+export { soundStyles as styles } from '../../styles/components/data/sound';
 
 const settings = Settings.get();
 const { widgets, soundWidgetOptions } = settings;
@@ -14,13 +14,10 @@ const { soundWidget } = widgets;
 const { refreshFrequency } = soundWidgetOptions;
 
 const DEFAULT_REFRESH_FREQUENCY = 20000;
-const REFRESH_FREQUENCY = Settings.getRefreshFrequency(
-  refreshFrequency,
-  DEFAULT_REFRESH_FREQUENCY
-);
+const REFRESH_FREQUENCY = Settings.getRefreshFrequency(refreshFrequency, DEFAULT_REFRESH_FREQUENCY);
 
 const getIcon = (volume, muted) => {
-  if (muted === "true" || !volume) return Icons.VolumeMuted;
+  if (muted === 'true' || !volume) return Icons.VolumeMuted;
   if (volume < 20) return Icons.NoVolume;
   if (volume < 50) return Icons.VolumeLow;
   return Icons.VolumeHigh;
@@ -35,19 +32,13 @@ export const Widget = () => {
   const [state, setState] = Uebersicht.React.useState();
   const [loading, setLoading] = Uebersicht.React.useState(soundWidget);
   const { volume: _volume } = state || {};
-  const [volume, setVolume] = Uebersicht.React.useState(
-    _volume && parseInt(_volume)
-  );
+  const [volume, setVolume] = Uebersicht.React.useState(_volume && parseInt(_volume));
   const [dragging, setDragging] = Uebersicht.React.useState(false);
 
   const getSound = async () => {
     const [volume, muted] = await Promise.all([
-      Uebersicht.run(
-        `osascript -e 'set ovol to output volume of (get volume settings)'`
-      ),
-      Uebersicht.run(
-        `osascript -e 'set ovol to output muted of (get volume settings)'`
-      ),
+      Uebersicht.run(`osascript -e 'set ovol to output volume of (get volume settings)'`),
+      Uebersicht.run(`osascript -e 'set ovol to output muted of (get volume settings)'`),
     ]);
     setState({
       volume: Utils.cleanupOutput(volume),
@@ -68,11 +59,36 @@ export const Widget = () => {
     }
   }, [_volume]);
 
+  const debouncedSetVolume = Uebersicht.React.useCallback(
+    Utils.debounce(
+      (event, volume) => {
+        event.persist();
+        const value = Math.min((volume - event.deltaY) | 0, 100);
+        setVolume(value);
+        setSound(value);
+      },
+      70,
+      { trailing: true },
+    ),
+    [],
+  );
+
+  const onWheel = (event) => {
+    event.persist();
+    debouncedSetVolume(event, volume);
+  };
+
+  Uebersicht.React.useEffect(() => {
+    return () => {
+      debouncedSetVolume.cancel();
+    };
+  }, []);
+
   if (loading) return <DataWidgetLoader.Widget className="sound" />;
   if (!state || volume === undefined) return null;
 
   const { muted } = state;
-  if (_volume === "missing value" || muted === "missing value") return null;
+  if (_volume === 'missing value' || muted === 'missing value') return null;
 
   const Icon = getIcon(volume, muted);
 
@@ -82,10 +98,9 @@ export const Widget = () => {
   };
   const onMouseDown = () => setDragging(true);
   const onMouseUp = () => setDragging(false);
-
   const fillerWidth = !volume ? volume : volume / 100 + 0.05;
 
-  const classes = Utils.classnames("sound", { "sound--dragging": dragging });
+  const classes = Utils.classnames('sound', { 'sound--dragging': dragging });
 
   return (
     <DataWidget.Widget classes={classes} disableSlider>
@@ -104,11 +119,9 @@ export const Widget = () => {
           onMouseDown={onMouseDown}
           onMouseUp={onMouseUp}
           onChange={onChange}
+          onWheel={onWheel}
         />
-        <div
-          className="sound__slider-filler"
-          style={{ transform: `scaleX(${fillerWidth})` }}
-        />
+        <div className="sound__slider-filler" style={{ transform: `scaleX(${fillerWidth})` }} />
       </div>
     </DataWidget.Widget>
   );

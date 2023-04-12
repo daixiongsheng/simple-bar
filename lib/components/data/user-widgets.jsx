@@ -1,10 +1,10 @@
-import * as Uebersicht from "uebersicht";
-import * as DataWidget from "./data-widget.jsx";
-import * as DataWidgetLoader from "./data-widget-loader.jsx";
-import * as Icons from "../icons.jsx";
-import * as Settings from "../../settings";
-import * as Utils from "../../utils";
-import useWidgetRefresh from "../../hooks/use-widget-refresh";
+import * as Uebersicht from 'uebersicht';
+import * as DataWidget from './data-widget.jsx';
+import * as DataWidgetLoader from './data-widget-loader.jsx';
+import * as Icons from '../icons.jsx';
+import * as Settings from '../../settings';
+import * as Utils from '../../utils';
+import useWidgetRefresh from '../../hooks/use-widget-refresh';
 
 const settings = Settings.get();
 const { userWidgetsList } = settings.userWidgets;
@@ -40,9 +40,7 @@ const UserWidget = ({ index, widget }) => {
 
   const isCustomColor = !Settings.userWidgetColors.includes(backgroundColor);
 
-  const property = settings.global.widgetsBackgroundColorAsForeground
-    ? "color"
-    : "backgroundColor";
+  const property = settings.global.widgetsBackgroundColorAsForeground ? 'color' : 'backgroundColor';
 
   const style = settings.global.noColorInData
     ? undefined
@@ -80,12 +78,7 @@ const UserWidget = ({ index, widget }) => {
   };
 
   return (
-    <DataWidget.Widget
-      classes={`user-widget user-widget--${index}`}
-      Icon={Icon}
-      style={style}
-      {...onClickProps}
-    >
+    <DataWidget.Widget classes={`user-widget user-widget--${index}`} Icon={Icon} style={style} {...onClickProps}>
       {state}
     </DataWidget.Widget>
   );
@@ -93,9 +86,7 @@ const UserWidget = ({ index, widget }) => {
 
 const UserWidgets = () => {
   const keys = Object.keys(userWidgetsList);
-  return keys.map((key) => (
-    <UserWidget key={key} index={key} widget={userWidgetsList[key]} />
-  ));
+  return keys.map((key) => <UserWidget key={key} index={key} widget={userWidgetsList[key]} />);
 };
 
 export default UserWidgets;

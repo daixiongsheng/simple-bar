@@ -1,28 +1,24 @@
-import * as Uebersicht from "uebersicht";
-import * as DataWidget from "./data-widget.jsx";
-import * as DataWidgetLoader from "./data-widget-loader.jsx";
-import * as Icons from "../icons.jsx";
-import useWidgetRefresh from "../../hooks/use-widget-refresh";
-import * as Utils from "../../utils";
-import * as Settings from "../../settings";
+import * as Uebersicht from 'uebersicht';
+import * as DataWidget from './data-widget.jsx';
+import * as DataWidgetLoader from './data-widget-loader.jsx';
+import * as Icons from '../icons.jsx';
+import useWidgetRefresh from '../../hooks/use-widget-refresh';
+import * as Utils from '../../utils';
+import * as Settings from '../../settings';
 
-export { timeStyles as styles } from "../../styles/components/data/time";
+export { timeStyles as styles } from '../../styles/components/data/time';
 
 const settings = Settings.get();
 const { widgets, timeWidgetOptions } = settings;
 const { timeWidget } = widgets;
-const { refreshFrequency, hour12, dayProgress, showSeconds } =
-  timeWidgetOptions;
+const { refreshFrequency, hour12, dayProgress, showSeconds } = timeWidgetOptions;
 
 const DEFAULT_REFRESH_FREQUENCY = 1000;
-const REFRESH_FREQUENCY = Settings.getRefreshFrequency(
-  refreshFrequency,
-  DEFAULT_REFRESH_FREQUENCY
-);
+const REFRESH_FREQUENCY = Settings.getRefreshFrequency(refreshFrequency, DEFAULT_REFRESH_FREQUENCY);
 
 const displayNotificationCenter = () =>
   Uebersicht.run(
-    `osascript -e 'tell application "System Events" to click menu bar item "Clock" of menu bar 1 of application process "ControlCenter"'`
+    `osascript -e 'tell application "System Events" to click menu bar item 1 of menu bar  of application process "ControlCenter"'`,
   );
 
 export const Widget = () => {
@@ -30,14 +26,14 @@ export const Widget = () => {
   const [loading, setLoading] = Uebersicht.React.useState(timeWidget);
 
   const options = {
-    hour: "numeric",
-    minute: "numeric",
-    second: showSeconds ? "numeric" : undefined,
+    hour: 'numeric',
+    minute: 'numeric',
+    second: showSeconds ? 'numeric' : undefined,
     hour12,
   };
 
   const getTime = () => {
-    const time = new Date().toLocaleString("en-UK", options);
+    const time = new Date().toLocaleString('en-UK', options);
     setState({ time });
     setLoading(false);
   };
@@ -62,19 +58,9 @@ export const Widget = () => {
   };
 
   return (
-    <DataWidget.Widget
-      classes="time"
-      Icon={Icons.Clock}
-      onClick={onClick}
-      disableSlider
-    >
+    <DataWidget.Widget classes="time" Icon={Icons.Clock} onClick={onClick} disableSlider>
       {time}
-      {dayProgress && (
-        <div
-          className="time__filler"
-          style={{ transform: `scaleX(${fillerWidth})` }}
-        />
-      )}
+      {dayProgress && <div className="time__filler" style={{ transform: `scaleX(${fillerWidth})` }} />}
     </DataWidget.Widget>
   );
 };
